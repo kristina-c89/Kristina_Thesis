@@ -1,5 +1,6 @@
 #ANNOTATION FROM VCF-FILES 
-#using snpEFF. CHANGE to directory snpEFF_analysis and cp vcf files
+#using snpEff. CHANGE to directory snpEFF_analysis and cp vcf files
+#run snpEff
 for f in test_2_all_to_end/*.vcf; do java -jar snpEff.jar NC_000962.3 <"$f" > ${f}_ann.vcf; done
 
 #annotated files contain annotation that is not needed, only interested in gene name and a.a changes 
