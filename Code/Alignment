@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# Index  ref genome 
+bwa index /home/kristina/Desktop/test_repository/ART_2/REF_WHOLE_GENOME/REF_WHOLE_GENOME.fasta
+
+#Use indexed ref and specify the samples that need to be aligned
+REF=/home/kristina/Desktop/Thesis_project/ART_2/REF_WHOLE_GENOME/REF_WHOLE_GENOME.fasta
+
+SAMPLE=($(for i in /home/kristina/Desktop/Thesis_project/ART_2/Trimming_FASTQ/Result/*.fastq.gz; do echo $(basename ${i%_}); done | cut -d '_' -f1 | uniq))
+
+for line in ${SAMPLE[@]};
+do
+    # declare variable
+    FORWARD=/home/kristina/Desktop/Thesis_project/ART_2/Trimming_FASTQ/Result/${line}_1P.fastq.gz
+    REVERSE=/home/kristina/Desktop/Thesis_project/ART_2/Trimming_FASTQ/Result/${line}_2P.fastq.gz
+    OUTPUT=/home/kristina/Desktop/Thesis_project/ART_2/mapped_REF_bam/${line}_SORT_REF.bam
+    
+    #then align and sort
+    echo "Aligning $i with bwa"
+    bwa mem -t 4 $REF $FORWARD $REVERSE | samtools view -b | samtools sort -T ${line} > $OUTPUT
+done
