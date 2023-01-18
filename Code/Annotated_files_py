@@ -1,0 +1,238 @@
+#%%
+import os
+import pandas as pd
+import glob
+
+#Rename the headers should only contain Gene and aminoacids 
+path = "/home/kristina/Desktop/Thesis_project/ART_2/mapped_REF_bam/out_7419"
+all_files = glob.glob(path + "/*.ann.vcf")
+#all_files = glob.glob(path + "/SRR9851465_G.P.vcf")
+
+aa_df = []
+for filename in all_files:
+  aa_df = pd.read_csv(filename, sep='\t')
+  new_header = {'ANN[*].GENE':'Gene', 'ANN[*].HGVS_P':'Aminoacids'}
+  aa_df.rename(columns=new_header,  inplace=True)
+#aa_df.head
+  aa_df.to_csv(filename, index=False, sep='\t')
+
+#%%
+## Use the following to split lines and output the columns gene / aminoacids 
+
+import os
+import pandas as pd
+import glob
+
+path = "/home/kristina/Desktop/Thesis_project/ART_2/mapped_REF_bam/out_7419"
+all_files = glob.glob(path + "/*.ann.vcf")
+
+test_files = all_files
+
+for filename in all_files:
+    with open(filename, 'r') as iput:
+        with open(f"{filename}_replaced.csv", 'w') as oput:
+            oput.write(f"Gene\tAminoacids\n")
+            for idx,line in enumerate(iput):
+                #exclude missing p.
+                if 'p.' not in line: 
+                    continue
+                #skip header
+                if idx > 0:
+                    Gene = line.rstrip().split('|')[0]
+                    Aminoacids = line.rstrip().split('\t')[1].split('p.')[1].split('|')[0]
+                    oput.write(f"{Gene}\t{Aminoacids}\n")
+    os.remove(filename)
+    os.rename(f"{filename}_replaced.csv", filename)
+   
+#%%
+# 321.py 
+# Change abbreviation from 3 to 1 a.a 
+import glob
+import pandas as pd 
+
+path = "/home/kristina/Desktop/"
+files = glob.glob(path + "/tb_mis_429_3")
+
+#samp = os.listdir(path) 
+
+filepath = files
+
+
+#print(filepath)
+def replace(inp):
+    for key in aa_code:
+        inp = inp.replace(key, aa_code[key])
+        inp = inp.replace('\t', '_')
+
+    return inp
+
+aa_code = {
+    'Ala': 'A',
+    'Arg': 'R',
+    'Asn': 'N',
+    'Asp': 'D',
+    'Cys': 'C',
+    'Gln': 'Q',
+    'Glu': 'E',
+    'Gly': 'G',
+    'His': 'H',
+    'Ile': 'I',
+    'Leu': 'L',
+    'Lys': 'K',
+    'Met': 'M',
+    'Phe': 'F',
+    'Pro': 'P',
+    'Ser': 'S',
+    'Thr': 'T',
+    'Trp': 'W',
+    'Tyr': 'Y',
+    'Val': 'V',
+    '?': '*',
+    'stop': '*',
+    '*': '*',
+}
+
+first_line = False
+output_file = f'{filepath}_aa_replaced.csv'
+
+for filepath in files:
+    with open(filepath, "r") as input:
+        with open(f"{filepath}_replaced_art2_aa.csv", 'w') as f:
+            for line in input:
+                if first_line:
+                    first_line = False
+                else:
+                    print(replace(line.strip()), file=f)
+#
+# %%
+import os 
+import pandas as pd 
+import glob
+
+#ADD FILENAME TO EACH FILE 
+path = "/home/kristina/Desktop/Thesis_project/Art_3/mapped_REF_bam/cover_art3"
+samp = glob.glob(path + "/*.regions.bed.gz")
+
+aa_filename_df = []
+for filename in samp:
+    aa_filename_df = pd.read_csv(filename, sep='\t')
+    aa_filename_df['Filename'] = os.path.basename(filename).split('.')[0]
+    aa_filename_df.to_csv(filename, index=False, sep='\t')
+aa_filename_df.head
+
+# %%
+# CONVERT EXCEL FILE WHO_aa.xlsx 
+import pandas as pd 
+d = pd.read_excel('/home/kristina/Desktop/Thesis_project/ART_1_info/Art_No_drug_1_gene_mut_replaced.xlsx', index_col=0)
+dout = '/home/kristina/Desktop/Test_new.json'
+
+d1 = d.transpose().to_dict(orient='list')
+print(d1)
+
+#THE JSON FILE 
+#/home/kristina/Desktop/result.json/Final_file.json
+
+#%%
+# Detect AMR, match with the json file and out put results 
+ 
+import os 
+import glob
+import json
+
+#import json and txt files
+f = open ('/home/kristina/Desktop/result.json/Final_AMR.json', "r")
+
+jsonfile = json.load(f)
+
+files = glob.glob('/home/kristina/Desktop/Thesis_project/ART_2/mapped_REF_bam/out_7419/*_replaced_art2_aa.csv')
+
+
+
+#loop through input (iput) and write output (oput). Split the input with tab  
+for n in files:
+    with open(n, 'r') as iput:
+        with open(f"{n}_AMR_Art_2.txt", 'w') as oput:
+            oput.write(f"Gene_Aminoacids\tAntibiotic\tFilename\n")
+            for line in iput:
+                Gene_Aminoacids,Filename = line.split('\t')
+            ## use try to handle KeyError    
+                try:
+                    Antibiotic = jsonfile[Gene_Aminoacids]
+                    #When found match print, 
+                    print(f"{Gene_Aminoacids}:{Antibiotic},{Filename}")
+                except KeyError:
+                    continue
+                oput.write(f"{Gene_Aminoacids}\t{Antibiotic}\t{Filename}\n")  
+                
+# How to concatinate all the results into 1 file 
+#%% 
+#Read into 1 file 
+# mv *_AMR_Art_1.txt --> AMR
+import glob
+AMR_path =  "/home/kristina/Desktop/Thesis_project/snpeff_analysis/a.a/Art_1_DONE/P_G.ann/R_G_P_ann.vcf/AMR"
+AMR_read_files = glob.glob("/home/kristina/Desktop/Thesis_project/snpeff_analysis/art3_VCF_TO_REF/res_G.P/replaced/AMR/*.txt")
+
+
+with open ("AMR_FINAL_3.txt", "wb") as outfile: 
+    for f in AMR_read_files: 
+        with open(f, "rb") as infile:
+            next(infile)    #skip headers in files 
+            outfile.write(infile.read())
+
+# Run with bash to sort 
+sort -k 3 -o Sort_AMR_con.txt  New_AMR_con.txt                
+
+#%% 
+# compare panels between mine and article 
+# split excel file by _ 
+#
+import pandas as pd 
+
+df_excel = pd.read_excel('/home/kristina/Desktop/Thesis_project/ART_1_info/Art_1_gene_mut.xlsx', index_col=0)
+df_excel[['key.0', 'key.1']] = df_excel['Gene'].str.split('_', expand=True)
+#df_excel.drop(column=['Gene'], inplace=True) 
+print(df_excel)
+
+# %%
+### Find unique in KC_panels compared to Art_1 
+with open("/home/kristina/Desktop/Thesis_project/Art_1/RIF_art.txt") as f_1, open("/home/kristina/Desktop/Thesis_project/Art_1/RIF_kc.txt") as f_2:
+    s1 = {line.strip() for line in f_1}
+    s2 = {line.strip() for line in f_2}
+
+    print(s2.difference(s1))
+    
+# %%
+#### Find unique lines in file 2(KC_panel) compared to file 1 (Art_1)
+import pandas as pd
+
+#with open("/home/kristina/Desktop/KC_gene_aa_TO_ART_1.txt") as f_1, open("/home/kristina/Desktop/Thesis_project/ART_1_info/Art_No_drug_1_gene_mut_replaced.txt") as f_2:
+with open("/home/kristina/Desktop/Thesis_project/Art_1/RIF_kc.txt") as f_1, open("/home/kristina/Desktop/Thesis_project/Art_1/RIF_art.txt") as f_2:
+out_ar2 = "home/kristina/Desktop/unique.csv"
+
+    s1 = {line.strip() for line in f_1}
+    s2 = {line.strip() for line in f_2}
+
+print(s1.difference(s2))
+
+# %%
+#Compare csv files to check for which genes and mutations are the same in the art_1 and who_variants
+#read csv and new output 
+import pandas as pd 
+df_1 = pd.read_csv("/home/kristina/Desktop/pheno_art1", sep='\t', header=None)
+df_2 = pd.read_csv("/home/kristina/Desktop/low_r_art1", sep='\t', header=None)
+out_same = "/home/kristina/Desktop/Thesis_project/Art_1/SAME/Same_pnca_art1.txt"
+
+#compare with isin() method 
+c_result = df_1[df_1.apply(tuple,1).isin(df_2.apply(tuple,1))]
+print(c_result)
+c_result.to_csv(out_same, index=0)
+
+# %% bin/bash 
+#RUN TB-PROFILER
+while read -u 10 line; 
+do tb-profiler profile
+-1 /home/kristina/Desktop/Thesis_project/ART_2/ENA_FILES/${line}/${line}_1.fastq.gz 
+-2 /home/kristina/Desktop/Thesis_project/ART_2/ENA_FILES/${line}/${line}_2.fastq.gz
+-t 4
+-p ${line}_tb --txt;
+done 10</home/kristina/Desktop/Thesis_project/ART_2/tb_mut_all_art2
