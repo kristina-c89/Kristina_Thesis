@@ -5,8 +5,7 @@ ls > all_samp_ART_2.txt
 #!/bin/bash
 while read -u 10 line; do 
 fastqc -t 8 /home/kristina/Desktop/Thesis_project/ART_2/ENA_FILES/${line}/${line}_1.fastq.gz /home/kristina/Desktop/Thesis_project/ART_2/ENA_FILES/${line}/${line}_2.fastq.gz -o /home/kristina/Desktop/Thesis_project/ART_2/ENA_FILES/FASTQ_2; done 10<all_samp_ART_2.txt
-
-# 
+ 
 #Unzip all fastq file 
 for zip in *.zip; do 
 unzip $zip; done 
