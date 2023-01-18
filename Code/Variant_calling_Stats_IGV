@@ -2,10 +2,10 @@
 freebayes -f /home/kristina/Desktop/Thesis_project/Art_3/REF_WHOLE_GENOME/REF_WHOLE_GENOME.fasta *_SORT_REF.bam > ${}_var.vcf
 
 #Check stat 
- rtg vcfstats *_SORT_REF.bam_var.vcf > rtg_art_.out
+rtg vcfstats *_SORT_REF.bam_var.vcf > rtg_art_.out
 
 #grep after SNP & InDel from each file and concat to 1 file
 
 #VIEW IN IGV 
-# USE REFERENCE FROM targeted.bed file to study mapping with IGV 
+#USE REFERENCE FROM targeted.bed file to study mapping with IGV 
 #NEED TO HAVE INDEX BAM file to view in igv/coverage + compare output from VCF file with IGV 
