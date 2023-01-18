@@ -1,4 +1,4 @@
-#Coverage with mosdepth
+#Coverage and depth with mosdepth
 while read line;
 do mosdepth -b targeted_genes.bed ${line}.regions.bed.gz 
 /home/kristina/Desktop/Thesis_project/ART_2/mapped_REF_bam/${line}; done 
