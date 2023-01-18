@@ -1,0 +1,12 @@
+#ANNOTATION FROM VCF-FILES 
+#using snpEFF. CHANGE to directory snpEFF_analysis and cp vcf files
+for f in test_2_all_to_end/*.vcf; do java -jar snpEff.jar NC_000962.3 <"$f" > ${f}_ann.vcf; done
+
+#annotated files contain annotation that is not needed, only interested in gene name and a.a changes 
+while read -u 10 line; 
+do  cat /home/kristina/Desktop/Thesis_project/snpeff_analysis/test_2_all_to_end/ann_vcf_test_art2/${line} 
+| scripts/vcfEffOnePerLine.pl | java -jar SnpSift.jar extractFields -s "|" -e "." 
+/home/kristina/Desktop/Thesis_project/snpeff_analysis/test_2_all_to_end/ann_vcf_test_art2/${line} "ANN[*].GENE" "ANN[*].HGVS_P" > 
+/home/kristina/Desktop/Thesis_project/snpeff_analysis/test_2_all_to_end/ann_vcf_test_art2/res_G.P/${line}_snpsift.ann.vcf; 
+done 10
+< /home/kristina/Desktop/Thesis_project/snpeff_analysis/test_2_all_to_end/ann_vcf_test_art2/ann_test_art2.txt
