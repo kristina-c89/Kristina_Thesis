@@ -1,0 +1,27 @@
+#To run FASTQ on all samples a list of all the sample needs to be inputed. 
+ls > all_samp_ART_2.txt
+
+#RUN FASTQC
+#!/bin/bash
+while read -u 10 line; do 
+fastqc -t 8 /home/kristina/Desktop/Thesis_project/ART_2/ENA_FILES/${line}/${line}_1.fastq.gz /home/kristina/Desktop/Thesis_project/ART_2/ENA_FILES/${line}/${line}_2.fastq.gz -o /home/kristina/Desktop/Thesis_project/ART_2/ENA_FILES/FASTQ_2; done 10<all_samp_ART_2.txt
+
+# 
+#Unzip all fastq file 
+for zip in *.zip; do 
+unzip $zip; done 
+
+# make a concatenated html file
+multiqc -o multiqc/ .
+
+#Look into report and see what needs to be trimmed. Rm adapters and check which adapter is included
+# Trimming reads 
+# all_art_2.txt is input for all of the sample that should be trimmed
+# parallel = parallelising jobs, run 4 processes in parallel, trimmomatic (pared reads), phred score (Convert quality scores to Phred-33), trimlog (log of all read trimmings), baseout (prefix to the resulting trimmed files), ILLUMINACLI (how to trim adapters, add TRUE for F-&R-reads), SLIDINGWINDOW (liding window trimming, cutting once the average quality within the window falls 
+# below a threshold), leading (Remove low quality bases from the beginning), trailing (Remove low quality bases from the end), milen (moves reads that fall below the specified minimal length)
+​
+cat all_art_2.txt | parallel -j 4 "trimmomatic PE -phred33 -trimlog trim_test_all_file sample/{}/{}_1.fastq.gz 
+sample/{}/{}_2.fastq.gz -baseout {}.TRIMMED.fastq.gz ILLUMINACLIP:TruSeq3-PE-2.fa:2:30:10:2:TRUE SLIDINGWINDOW:4:20 
+LEADING:5 TRAILING:5 MINLEN:35 2> log/{}_trim1.log"
+​
+## Re-run fastqc + multiqc to see that all adapters (Trueseq/nextera) is removed
